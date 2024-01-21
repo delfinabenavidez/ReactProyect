@@ -9,36 +9,57 @@ import { Footer, Navbar } from "../components";
 
 const Product = () => {
   const { id } = useParams();
-  const [product, setProduct] = useState([]);
-  const [similarProducts, setSimilarProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loading2, setLoading2] = useState(false);
+  const [producto, setProducto] = useState([]);
+  const [productosSimilares, setProductosSimilares] = useState([]);
+  const [cargando, setCargando] = useState(false);
+  const [cargando2] = useState(false);
 
   const dispatch = useDispatch();
 
-  const addProduct = (product) => {
-    dispatch(addCart(product));
+  const agregarAlCarrito = (producto) => {
+    dispatch(addCart(producto));
   };
 
   useEffect(() => {
-    const getProduct = async () => {
-      setLoading(true);
-      setLoading2(true);
-      const response = await fetch(`https://fakestoreapi.com/products/${id}`);
-      const data = await response.json();
-      setProduct(data);
-      setLoading(false);
-      const response2 = await fetch(
-        `https://fakestoreapi.com/products/category/${data.category}`
-      );
-      const data2 = await response2.json();
-      setSimilarProducts(data2);
-      setLoading2(false);
+    const obtenerProducto = async () => {
+      setCargando(true);
+
+      try {
+        const respuesta = await fetch(`https://fakestoreapi.com/products/${id}`);
+        const datos = await respuesta.json();
+
+        // Cambiar los nombres de las propiedades al español
+        const productoTraducido = {
+          ...datos,
+          categoria: datos.category,
+          titulo: datos.title,
+          descripcion: datos.description,
+        };
+
+        setProducto(productoTraducido);
+
+        const respuesta2 = await fetch(`https://fakestoreapi.com/products/category/${datos.category}`);
+        const datos2 = await respuesta2.json();
+
+        // Cambiar los nombres de las propiedades de productos similares al español
+        const productosSimilaresTraducidos = datos2.map((item) => ({
+          ...item,
+          titulo: item.title,
+          // Puedes cambiar más nombres de propiedades según sea necesario
+        }));
+
+        setProductosSimilares(productosSimilaresTraducidos);
+      } catch (error) {
+        // Manejar errores
+      } finally {
+        setCargando(false);
+      }
     };
-    getProduct();
+
+    obtenerProducto();
   }, [id]);
 
-  const Loading = () => {
+  const Cargando = () => {
     return (
       <>
         <div className="container my-5 py-2">
@@ -61,7 +82,7 @@ const Product = () => {
     );
   };
 
-  const ShowProduct = () => {
+  const MostrarProducto = () => {
     return (
       <>
         <div className="container my-5 py-2">
@@ -69,24 +90,24 @@ const Product = () => {
             <div className="col-md-6 col-sm-12 py-3">
               <img
                 className="img-fluid"
-                src={product.image}
-                alt={product.title}
+                src={producto.image}
+                alt={producto.titulo}
                 width="400px"
                 height="400px"
               />
             </div>
             <div className="col-md-6 col-md-6 py-5">
-              <h4 className="text-uppercase text-muted">{product.category}</h4>
-              <h1 className="display-5">{product.title}</h1>
+              <h4 className="text-uppercase text-muted">{producto.categoria}</h4>
+              <h1 className="display-5">{producto.titulo}</h1>
               <p className="lead">
-                {product.rating && product.rating.rate}{" "}
+                {producto.rating && producto.rating.rate}{" "}
                 <i className="fa fa-star"></i>
               </p>
-              <h3 className="display-6  my-4">${product.price}</h3>
-              <p className="lead">{product.description}</p>
+              <h3 className="display-6  my-4">${producto.price}</h3>
+              <p className="lead">{producto.descripcion}</p>
               <button
                 className="btn btn-outline-dark"
-                onClick={() => addProduct(product)}
+                onClick={() => agregarAlCarrito(producto)}
               >
                 Añadir al Carrito
               </button>
@@ -100,7 +121,7 @@ const Product = () => {
     );
   };
 
-  const Loading2 = () => {
+  const Cargando2 = () => {
     return (
       <>
         <div className="my-4 py-4">
@@ -123,12 +144,12 @@ const Product = () => {
     );
   };
 
-  const ShowSimilarProduct = () => {
+  const MostrarProductosSimilares = () => {
     return (
       <>
         <div className="py-4 my-4">
           <div className="d-flex">
-            {similarProducts.map((item) => {
+            {productosSimilares.map((item) => {
               return (
                 <div key={item.id} className="card mx-4 text-center">
                   <img
@@ -140,7 +161,7 @@ const Product = () => {
                   />
                   <div className="card-body">
                     <h5 className="card-title">
-                      {item.title.substring(0, 15)}...
+                      {item.titulo.substring(0, 15)}...
                     </h5>
                   </div>
                   <div className="card-body">
@@ -152,7 +173,7 @@ const Product = () => {
                     </Link>
                     <button
                       className="btn btn-dark m-1"
-                      onClick={() => addProduct(item)}
+                      onClick={() => agregarAlCarrito(item)}
                     >
                       Añadir al Carrito
                     </button>
@@ -165,20 +186,21 @@ const Product = () => {
       </>
     );
   };
+
   return (
     <>
       <Navbar />
       <div className="container">
-        <div className="row">{loading ? <Loading /> : <ShowProduct />}</div>
+        <div className="row">{cargando ? <Cargando /> : <MostrarProducto />}</div>
         <div className="row my-5 py-5">
           <div className="d-none d-md-block">
-          <h2 className=""> Puede que tambien te interese...</h2>
+            <h2 className=""> Puede que también te interese...</h2>
             <Marquee
               pauseOnHover={true}
               pauseOnClick={true}
               speed={50}
             >
-              {loading2 ? <Loading2 /> : <ShowSimilarProduct />}
+              {cargando2 ? <Cargando2 /> : <MostrarProductosSimilares />}
             </Marquee>
           </div>
         </div>
