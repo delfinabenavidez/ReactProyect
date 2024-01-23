@@ -28,7 +28,7 @@ const Product = () => {
         const respuesta = await fetch(`https://fakestoreapi.com/products/${id}`);
         const datos = await respuesta.json();
 
-        // Cambiar los nombres de las propiedades al español
+        // 
         const productoTraducido = {
           ...datos,
           categoria: datos.category,
@@ -41,11 +41,11 @@ const Product = () => {
         const respuesta2 = await fetch(`https://fakestoreapi.com/products/category/${datos.category}`);
         const datos2 = await respuesta2.json();
 
-        // Cambiar los nombres de las propiedades de productos similares al español
+        // 
         const productosSimilaresTraducidos = datos2.map((item) => ({
           ...item,
           titulo: item.title,
-          // Puedes cambiar más nombres de propiedades según sea necesario
+          // 
         }));
 
         setProductosSimilares(productosSimilaresTraducidos);
